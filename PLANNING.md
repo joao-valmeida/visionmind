@@ -23,10 +23,11 @@
 
 | Aula | Conteúdo | Material |
 |------|----------|----------|
-| 3.1 | Serving, KService, escala automática, concurrency | [knative/README.md](knative/README.md) |
-| 3.2 | Instalação: Operator + Helm + Istio | [knative/docs/02-instalacao-operator.md](knative/docs/02-instalacao-operator.md) |
-| 3.3 | Primeiro deploy + tráfego canário | [knative/docs/04-primeiro-kservice.md](knative/docs/04-primeiro-kservice.md) |
-| 3.4 | (Opcional) Eventing — Broker, Trigger | [knative/docs/06-eventing.md](knative/docs/06-eventing.md) |
+| 3.1 | Kind + Istio (lab local) | [cluster/](cluster/) |
+| 3.2 | Serving, KService, escala automática | [knative/README.md](knative/README.md) |
+| 3.3 | Instalação: Operator + Helm | [knative/docs/02-instalacao-operator.md](knative/docs/02-instalacao-operator.md) |
+| 3.4 | Primeiro deploy + tráfego canário | [knative/docs/04-primeiro-kservice.md](knative/docs/04-primeiro-kservice.md) |
+| 3.5 | (Opcional) Eventing | [knative/docs/06-eventing.md](knative/docs/06-eventing.md) |
 
 ## Módulo 4 — Integração e produção
 
@@ -45,5 +46,5 @@
 ## Ordem recomendada de preparação (professor)
 
 1. Validar labs AWS/Azure/GCP em conta de demonstração.
-2. Instalar Knative no cluster de lab (seguir `knative/helm`).
-3. Gravar URLs e credenciais de sandbox para a turma.
+2. Subir cluster Kind + Istio (`cluster/`).
+3. Instalar Knative no cluster de lab (seguir `knative/helm`).

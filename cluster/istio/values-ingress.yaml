@@ -1,0 +1,24 @@
+# Valores mínimos — Istio ingress gateway em Kind
+# Usado com: istioctl install / helm install istio-ingress
+
+name: istio-ingress
+replicaCount: 1
+
+labels:
+  istio: ingress
+
+service:
+  type: NodePort
+  ports:
+    - name: status-port
+      port: 15021
+      nodePort: 30021
+      targetPort: 15021
+    - name: http
+      port: 80
+      nodePort: 30080
+      targetPort: 8080
+    - name: https
+      port: 443
+      nodePort: 30443
+      targetPort: 8443

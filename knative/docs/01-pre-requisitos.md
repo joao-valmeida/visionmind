@@ -2,51 +2,46 @@
 
 ## Cluster Kubernetes
 
-| Item | Mínimo | Lab PagueMenos (referência) |
-|------|--------|-----------------------------|
-| Versão K8s | 1.28+ | 1.35.x |
-| CNI | Qualquer suportado | Calico/Cilium/etc. |
-| Storage | Opcional (só se app precisar PVC) | nfs-client |
-| CPU nos workers | 2+ vCPU livres para Knative + Istio | 3 workers |
+| Item | Mínimo | Lab (Kind deste repo) |
+|------|--------|------------------------|
+| Versão K8s | 1.28+ | **1.36** ([cluster/kind](../cluster/kind/)) |
+| Istio | Obrigatório (`net-istio`) | [cluster/istio](../cluster/istio/) |
+| Nós | 1+ control-plane | 1 CP + 3 workers |
+| CPU | ~2 vCPU livres | Docker host da turma |
 
 ## Istio (rede Knative)
 
 Knative com **`net-istio`** exige Istio instalado **antes** do Serving.
 
-No cluster de infra:
+Siga [cluster/istio/README.md](../cluster/istio/README.md):
 
 - `istiod` em `istio-system`
 - Gateway ingress com label `istio: ingress` em `istio-ingress`
-- Certificado TLS wildcard (opcional para HTTPS em KServices)
 
-Sem Istio, altere `helm/values.yaml` → `serving.ingress.class: kourier` e instale Kourier (não coberto neste material).
+Sem Istio, altere `helm/values.yaml` → use Kourier (não documentado neste curso).
 
 ## Ferramentas locais
 
 ```bash
 kubectl version --client
 helm version
+kind version
+docker version
 ```
 
-## Capacidade do cluster
+## DNS (opcional em lab)
 
-Knative adiciona componentes em namespaces `knative-serving`, `istio-system` (sidecars):
+Com Kind, acesse serviços via `http://IP-A-ALTERAR:PORTA-ISTIO-HTTP-A-ALTERAR` ou configure `/etc/hosts`:
 
-- **controller**, **activator**, **autoscaler**, **webhook**
+```text
+IP-A-ALTERAR  hello.default.serverless.lab
+```
 
-Reserve ~500m CPU e ~512Mi RAM além do que já consome o control plane.
+Para domínio Knative, patch `config-domain` — ver [03-istio.md](03-istio.md).
 
-## DNS (produção / lab com URL fixa)
+## Checklist antes de instalar Knative
 
-Configure um wildcard ou host por app, por exemplo:
-
-- `*.serverless.pmenos.com.br` → IP do Istio ingress
-
-No `config-domain` (ConfigMap gerenciado pelo Knative) o domínio padrão pode ser alterado após install — ver [03-istio.md](03-istio.md).
-
-## Checklist antes de instalar
-
-- [ ] `kubectl get nodes` — todos Ready
+- [ ] `kubectl get nodes` — 4 nós Ready
 - [ ] `kubectl get pods -n istio-system` — istiod Running
 - [ ] `kubectl get pods -n istio-ingress` — gateway Running
-- [ ] Sem outro ingress controller conflitando na porta 80/443 do NodePort/LB
+- [ ] Teste httpbin do README Istio passou

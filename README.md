@@ -7,12 +7,9 @@ Material de planejamento e laboratórios para aulas de **serverless** em múltip
 ```
 Serverless-Pos-Unifor/
   PLANNING.md                 # Roteiro de aulas
+  cluster/                    # Kind + Istio (lab local)
   knative/                    # Kubernetes serverless (Helm + docs)
   labs/step-functions/        # Mesma app, 3 clouds
-    spec/                     # Contrato comum do workflow
-    aws/                      # Step Functions + Lambda
-    azure/                    # Durable Functions
-    gcp/                      # Cloud Workflows + Cloud Functions
 ```
 
 ## Laboratórios
@@ -35,5 +32,5 @@ Ver [labs/step-functions/spec/workflow.md](labs/step-functions/spec/workflow.md)
 ## Pré-requisitos gerais
 
 - Conta/créditos em AWS, Azure e GCP (ou sandbox da turma)
-- Cluster Kubernetes com Istio (para Knative) — ver [knative/docs/01-pre-requisitos.md](knative/docs/01-pre-requisitos.md)
-- `kubectl`, `helm`, CLI das clouds (`aws`, `az`, `gcloud`)
+- Cluster local: [cluster/kind](cluster/kind/) + [cluster/istio](cluster/istio/) (Kind 1.36 + Istio)
+- `kubectl`, `helm`, `kind`, CLI das clouds (`aws`, `az`, `gcloud`)

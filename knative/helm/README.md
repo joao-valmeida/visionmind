@@ -33,6 +33,6 @@ kubectl get knativeserving -n knative-serving
 kubectl get pods -n knative-serving
 ```
 
-## Integração GitOps (opcional)
+## GitOps (opcional)
 
-Para colocar no `TEC-RT-K8S-INFRA-CORE`, copie o chart para `platform/knative/` e adicione Application no `root-app` com sync **manual** (igual Istio).
+Este chart é para o lab da pós. Em produção, adapte values (versão, HA, domínio) ao ambiente da turma.

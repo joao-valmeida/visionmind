@@ -1,6 +1,6 @@
 # Knative — Kubernetes serverless
 
-Knative **Serving** expõe containers com escala automática (incluindo **scale-to-zero**) e roteamento HTTP. Este material usa **Istio** como camada de rede (compatível com o cluster de infra da turma/lab).
+Knative **Serving** expõe containers com escala automática (incluindo **scale-to-zero**) e roteamento HTTP. Este material usa **Istio** no cluster Kind do curso.
 
 ## Visão rápida
 
@@ -14,7 +14,8 @@ Cliente → Istio Gateway → Knative Activator/Queue-Proxy → Pod(s) da revis�
 
 | Passo | O quê | Onde |
 |-------|--------|------|
-| 1 | Pré-requisitos (K8s, Istio, DNS) | [docs/01-pre-requisitos.md](docs/01-pre-requisitos.md) |
+| 0 | Kind + Istio | [../cluster/](../cluster/) |
+| 1 | Pré-requisitos | [docs/01-pre-requisitos.md](docs/01-pre-requisitos.md) |
 | 2 | Knative **Operator** (uma vez no cluster) | [docs/02-instalacao-operator.md](docs/02-instalacao-operator.md) |
 | 3 | **Helm** — `KnativeServing` (+ Eventing opcional) | [helm/](helm/) |
 | 4 | Istio + domínio | [docs/03-istio.md](docs/03-istio.md) |

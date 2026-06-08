@@ -29,16 +29,17 @@ kubectl get ksvc hello
 kubectl get pods -l serving.knative.dev/service=hello
 ```
 
-URL (com `config-domain` configurado):
+URL (com `config-domain` = `serverless.lab` e entrada no `/etc/hosts`):
 
 ```text
-http://hello.default.serverless.pmenos.com.br
+http://hello.default.serverless.lab
 ```
 
-Teste:
+Teste (Kind — ajuste IP/porta do [kind-config.yaml](../../cluster/kind/kind-config.yaml)):
 
 ```bash
-curl -s "http://hello.default.serverless.pmenos.com.br" -H "Host: hello.default.serverless.pmenos.com.br"
+curl -s "http://IP-A-ALTERAR:PORTA-ISTIO-HTTP-A-ALTERAR" \
+  -H "Host: hello.default.serverless.lab"
 ```
 
 ## Autoscale (scale to zero)
@@ -47,7 +48,8 @@ curl -s "http://hello.default.serverless.pmenos.com.br" -H "Host: hello.default.
 # aguarde ~60s sem tráfego
 kubectl get pods -l serving.knative.dev/service=hello
 # 0 pods — cold start na próxima requisição
-curl -s "http://hello.default.serverless.pmenos.com.br" -H "Host: hello.default.serverless.pmenos.com.br"
+curl -s "http://IP-A-ALTERAR:PORTA-ISTIO-HTTP-A-ALTERAR" \
+  -H "Host: hello.default.serverless.lab"
 kubectl get pods -l serving.knative.dev/service=hello
 ```
 
@@ -86,4 +88,4 @@ Ajuste `revisionName` conforme `kubectl get revisions`.
 
 1. Deploy do helloworld.
 2. Medir tempo de cold start (primeira request após idle).
-3. Publicar imagem própria no Harbor (`public/`) e apontar o KService para ela.
+3. Publicar imagem no registry da turma (Docker Hub ou registry compartilhado) e apontar o KService para ela.
