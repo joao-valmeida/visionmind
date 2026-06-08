@@ -1,0 +1,53 @@
+{
+  "Comment": "Processamento de pedido — Serverless Unifor",
+  "StartAt": "ValidateOrder",
+  "States": {
+    "ValidateOrder": {
+      "Type": "Task",
+      "Resource": "${ValidateOrderArn}",
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.error",
+          "Next": "Failed"
+        }
+      ],
+      "Next": "ProcessPayment"
+    },
+    "ProcessPayment": {
+      "Type": "Task",
+      "Resource": "${ProcessPaymentArn}",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 2,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.error",
+          "Next": "Failed"
+        }
+      ],
+      "Next": "SendNotification"
+    },
+    "SendNotification": {
+      "Type": "Task",
+      "Resource": "${SendNotificationArn}",
+      "End": true
+    },
+    "Failed": {
+      "Type": "Pass",
+      "Parameters": {
+        "status": "FAILED",
+        "orderId.$": "$.orderId",
+        "step.$": "$.error.Error",
+        "error.$": "$.error.Cause"
+      },
+      "End": true
+    }
+  }
+}

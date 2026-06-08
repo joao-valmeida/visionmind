@@ -1,0 +1,19 @@
+{{- if .Values.eventing.enabled }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.eventing.namespace }}
+  labels:
+    app.kubernetes.io/part-of: knative
+---
+apiVersion: operator.knative.dev/v1beta1
+kind: KnativeEventing
+metadata:
+  name: {{ .Values.eventing.name }}
+  namespace: {{ .Values.eventing.namespace }}
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/part-of: knative
+spec:
+  version: {{ .Values.eventing.version | quote }}
+{{- end }}

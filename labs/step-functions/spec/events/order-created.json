@@ -1,0 +1,7 @@
+{
+  "orderId": "ORD-1001",
+  "customerEmail": "aluno@unifor.br",
+  "amount": 150.50,
+  "currency": "BRL",
+  "simulateFailure": false
+}

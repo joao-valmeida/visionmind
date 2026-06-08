@@ -1,0 +1,29 @@
+# Requer Knative Operator instalado — ver docs/02-instalacao-operator.md
+
+serving:
+  enabled: true
+  name: knative-serving
+  namespace: knative-serving
+  version: "1.17.0"
+  highAvailability:
+    replicas: 1
+  istio:
+    enabled: true
+    knativeIngressGateway:
+      selector:
+        istio: ingress
+    knativeLocalGateway:
+      selector:
+        istio: ingress
+  config:
+    # Autoscale — scale to zero após idle
+    autoscaler:
+      enable-scale-to-zero: "true"
+      scale-to-zero-grace-period: "30s"
+      stable-window: "60s"
+
+eventing:
+  enabled: false
+  name: knative-eventing
+  namespace: knative-eventing
+  version: "1.17.0"

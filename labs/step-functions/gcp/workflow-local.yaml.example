@@ -1,0 +1,24 @@
+# Copie para workflow.yaml após deploy das functions (URLs reais)
+main:
+  params: [input]
+  steps:
+    - validate:
+        call: http.post
+        args:
+          url: https://REGION-PROJECT.cloudfunctions.net/order-validate
+          body: ${input}
+        result: validated
+    - payment:
+        call: http.post
+        args:
+          url: https://REGION-PROJECT.cloudfunctions.net/order-payment
+          body: ${validated.body}
+        result: paid
+    - notify:
+        call: http.post
+        args:
+          url: https://REGION-PROJECT.cloudfunctions.net/order-notify
+          body: ${paid.body}
+        result: notification
+    - done:
+        return: ${notification.body}

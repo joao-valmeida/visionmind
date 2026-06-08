@@ -1,0 +1,41 @@
+{{- if .Values.serving.enabled }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.serving.namespace }}
+  labels:
+    app.kubernetes.io/part-of: knative
+---
+apiVersion: operator.knative.dev/v1beta1
+kind: KnativeServing
+metadata:
+  name: {{ .Values.serving.name }}
+  namespace: {{ .Values.serving.namespace }}
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/part-of: knative
+spec:
+  version: {{ .Values.serving.version | quote }}
+  high-availability:
+    replicas: {{ .Values.serving.highAvailability.replicas }}
+  {{- if .Values.serving.istio.enabled }}
+  ingress:
+    istio:
+      enabled: true
+      knative-ingress-gateway:
+        selector:
+          {{- toYaml .Values.serving.istio.knativeIngressGateway.selector | nindent 10 }}
+      knative-local-gateway:
+        selector:
+          {{- toYaml .Values.serving.istio.knativeLocalGateway.selector | nindent 10 }}
+  {{- end }}
+  {{- with .Values.serving.config }}
+  config:
+    {{- range $key, $val := . }}
+    {{ $key }}:
+      {{- range $k, $v := $val }}
+      {{ $k }}: {{ $v | quote }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+{{- end }}
