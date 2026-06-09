@@ -17,9 +17,70 @@ Payload de teste: [spec/events/cep-lookup.json](spec/events/cep-lookup.json)
 
 | Ferramenta | AWS | Azure | GCP |
 |------------|-----|-------|-----|
-| CLI | [AWS CLI v2](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) | [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli) | [gcloud](https://cloud.google.com/sdk/docs/install) |
-| Deploy | [SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html) | [Azure Functions Core Tools v4](https://learn.microsoft.com/azure/azure-functions/functions-run-local) | (incluído no gcloud) |
+| CLI | AWS CLI v2 | Azure CLI | gcloud |
+| Deploy | **SAM CLI** + Docker | Azure Functions Core Tools v4 | (incluído no gcloud) |
 | Runtime local | Python 3.12 ou Node 20 | idem | idem |
+
+Documentação oficial: [instalar SAM](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html) · [instalar AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+
+### Instalar AWS SAM CLI
+
+O `sam build` usa **Docker** para empacotar Lambdas — instale o [Docker Desktop](https://www.docker.com/products/docker-desktop/) (ou Docker Engine no Linux) **antes** do SAM.
+
+#### Windows
+
+**Opção A — instalador (recomendado)**
+
+1. Baixe o MSI em [releases do AWS SAM CLI](https://github.com/aws/aws-sam-cli/releases/latest) (`AWS_SAM_CLI_64_PY3.msi`).
+2. Execute o instalador (Next → Next).
+3. Feche e reabra o PowerShell ou CMD.
+
+**Opção B — winget**
+
+```powershell
+winget install Amazon.SAM-CLI
+```
+
+#### macOS
+
+```bash
+brew install aws-sam-cli
+```
+
+(Se não tiver Homebrew: [brew.sh](https://brew.sh))
+
+#### Linux (Ubuntu / Debian)
+
+```bash
+# Dependências
+sudo apt update
+sudo apt install -y unzip docker.io
+sudo usermod -aG docker $USER
+# Faça logout/login para o grupo docker valer
+
+# SAM CLI (binário oficial)
+wget https://github.com/aws/aws-sam-cli/releases/latest/download/aws-sam-cli-linux-x86_64.zip
+unzip aws-sam-cli-linux-x86_64.zip -d sam-installation
+sudo ./sam-installation/install
+```
+
+Fedora/RHEL e outras distros: ver [guia AWS por SO](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html).
+
+#### Verificar instalação
+
+```bash
+sam --version
+docker run hello-world
+aws --version
+```
+
+Saída esperada (versões podem variar):
+
+```text
+SAM CLI, version 1.x.x
+```
+
+Se `sam build` falhar com erro de Docker, confirme que o daemon está rodando (`docker ps`).
 
 ---
 
@@ -41,7 +102,29 @@ Payload de teste: [spec/events/cep-lookup.json](spec/events/cep-lookup.json)
 2. Permissões: anexe `AdministratorAccess` **apenas em conta de lab**; em produção use políticas mínimas.
 3. **Security credentials** → **Create access key** → CLI → guarde `Access Key ID` e `Secret Access Key`.
 
-### 3. Configurar CLI
+### 3. Instalar AWS CLI (se ainda não tiver)
+
+**Windows (winget):**
+
+```powershell
+winget install Amazon.AWSCLI
+```
+
+**macOS:**
+
+```bash
+brew install awscli
+```
+
+**Linux:**
+
+```bash
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o awscliv2.zip
+unzip awscliv2.zip
+sudo ./aws/install
+```
+
+### 4. Configurar credenciais
 
 ```bash
 aws configure
@@ -53,7 +136,18 @@ aws configure
 aws sts get-caller-identity
 ```
 
-### 4. Deploy — Python
+### 5. Instalar SAM CLI
+
+Siga a seção [Instalar AWS SAM CLI](#instalar-aws-sam-cli) no topo deste guia (Windows / macOS / Linux + Docker).
+
+Confirme antes do deploy:
+
+```bash
+sam --version
+docker ps
+```
+
+### 6. Deploy — Python
 
 ```bash
 cd labs/step-functions/aws/python
@@ -73,7 +167,7 @@ Sugestões no `--guided`:
 
 Anote o output **`StateMachineArn`**.
 
-### 5. Deploy — Node.js
+### 7. Deploy — Node.js
 
 ```bash
 cd labs/step-functions/aws/nodejs
@@ -83,7 +177,7 @@ sam deploy --guided
 
 (Use outro stack name se já deployou Python, ex.: `serverless-unifor-cep-node`.)
 
-### 6. Testar
+### 8. Testar
 
 ```bash
 aws stepfunctions start-execution \
@@ -99,7 +193,7 @@ aws stepfunctions describe-execution --execution-arn "<execution-arn-from-output
 
 Console: **Step Functions** → state machine → **Executions**.
 
-### 7. Limpar (evitar custo)
+### 9. Limpar (evitar custo)
 
 ```bash
 sam delete --stack-name serverless-unifor-cep

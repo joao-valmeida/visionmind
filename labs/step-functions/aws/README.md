@@ -1,6 +1,8 @@
 # AWS — Step Functions + Lambda (busca CEP)
 
-Conta, IAM e deploy detalhado: [../CONTAS-E-DEPLOY.md](../CONTAS-E-DEPLOY.md#aws)
+Conta, IAM, **instalação do SAM** e deploy: [../CONTAS-E-DEPLOY.md](../CONTAS-E-DEPLOY.md#aws)
+
+**Pré-requisitos:** Docker + [SAM CLI](../CONTAS-E-DEPLOY.md#instalar-aws-sam-cli) + AWS CLI
 
 | Linguagem | Pasta | Runtime |
 |-----------|-------|---------|
