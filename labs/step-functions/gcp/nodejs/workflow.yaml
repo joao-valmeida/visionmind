@@ -1,0 +1,30 @@
+# Substitua VALIDATE_URL, FETCH_URL, FORMAT_URL após deploy das functions
+main:
+  params: [input]
+  steps:
+    - validate:
+        call: http.post
+        args:
+          url: VALIDATE_URL
+          body: ${input}
+        result: validated
+    - fetch:
+        call: http.post
+        args:
+          url: FETCH_URL
+          body: ${validated.body}
+        result: fetched
+        retry:
+          max_retries: 2
+          backoff:
+            initial_delay: 2
+            max_delay: 10
+            multiplier: 2
+    - format:
+        call: http.post
+        args:
+          url: FORMAT_URL
+          body: ${fetched.body}
+        result: formatted
+    - done:
+        return: ${formatted.body}

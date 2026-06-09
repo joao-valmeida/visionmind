@@ -13,7 +13,7 @@ apiVersion: kind.x-k8s.io/v1alpha4
 name: serverless-unifor
 
 networking:
-  # API server acessível fora do Docker (ajuste IP/porta nos extraPortMappings)
+  # API server no host — NÃO repetir 6443 em extraPortMappings (conflito de porta)
   apiServerAddress: "IP-A-ALTERAR"
   apiServerPort: PORTA-KUBE-API-A-ALTERAR
 
@@ -27,12 +27,7 @@ nodes:
           kubeletExtraArgs:
             node-labels: "ingress-ready=true"
     extraPortMappings:
-      # Kubernetes API (control-plane → host)
-      - containerPort: 6443
-        hostPort: PORTA-KUBE-API-A-ALTERAR
-        listenAddress: "IP-A-ALTERAR"
-        protocol: TCP
-      # HTTP — usado pelo Istio ingress gateway (NodePort 80 → host)
+      # HTTP — Istio ingress (mapeia host → :80 do nó; ver cluster/istio/README.md)
       - containerPort: 80
         hostPort: PORTA-ISTIO-HTTP-A-ALTERAR
         listenAddress: "IP-A-ALTERAR"

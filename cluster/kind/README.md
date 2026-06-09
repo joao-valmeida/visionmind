@@ -19,9 +19,11 @@ Edite [kind-config.yaml](kind-config.yaml) ou use `sed` (ver [../README.md](../R
 
 | Campo | Placeholder | Exemplo |
 |-------|-------------|---------|
-| `listenAddress` | `IP-A-ALTERAR` | `192.168.56.10` ou `0.0.0.0` |
-| API Server | `PORTA-KUBE-API-A-ALTERAR` | `6443` |
-| Istio HTTP | `PORTA-ISTIO-HTTP-A-ALTERAR` | `8080` |
+| `apiServerAddress` | `IP-A-ALTERAR` | `0.0.0.0` ou IP da VM |
+| `apiServerPort` | `PORTA-KUBE-API-A-ALTERAR` | `6443` (só em `networking`, não em `extraPortMappings`) |
+| Istio HTTP (`extraPortMappings`) | `PORTA-ISTIO-HTTP-A-ALTERAR` | `8080` |
+
+> A API (`6443`) é exposta **apenas** por `networking.apiServerPort`. Duplicar em `extraPortMappings` causa erro de porta em uso.
 
 > **Nota:** `listenAddress` precisa ser um IP válido no host (não deixe literal `IP-A-ALTERAR` ao criar o cluster).
 
@@ -78,7 +80,7 @@ Host (IP-A-ALTERAR)
 
 | Problema | Solução |
 |----------|---------|
-| Porta em uso | Troque `PORTA-*-A-ALTERAR` |
+| Porta em uso / bind 6443 2x | API só em `networking.apiServerPort`; troque portas se necessário |
 | Imagem 1.36 não encontrada | `docker pull kindest/node:v1.36.0` |
 | Workers NotReady | Aguarde 1–2 min; `docker logs` no container do nó |
 

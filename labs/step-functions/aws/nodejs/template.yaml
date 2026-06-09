@@ -1,0 +1,48 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Busca CEP — Step Functions + Lambda (Node.js)
+
+Globals:
+  Function:
+    Runtime: nodejs20.x
+    Timeout: 30
+    MemorySize: 256
+
+Resources:
+  ValidateCepFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/validate/
+      Handler: handler.handler
+
+  FetchCepFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/fetch/
+      Handler: handler.handler
+
+  FormatResponseFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/format/
+      Handler: handler.handler
+
+  CepStateMachine:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      DefinitionUri: state-machine.asl.json
+      DefinitionSubstitutions:
+        ValidateCepArn: !GetAtt ValidateCepFunction.Arn
+        FetchCepArn: !GetAtt FetchCepFunction.Arn
+        FormatResponseArn: !GetAtt FormatResponseFunction.Arn
+      Policies:
+        - LambdaInvokePolicy:
+            FunctionName: !Ref ValidateCepFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref FetchCepFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref FormatResponseFunction
+
+Outputs:
+  StateMachineArn:
+    Value: !Ref CepStateMachine

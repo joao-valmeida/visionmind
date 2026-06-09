@@ -1,33 +1,37 @@
-# Especificação — Workflow Processamento de Pedido
+# Especificação — Workflow Busca de CEP
 
-## Entrada (`OrderCreated`)
+Mesma aplicação em **Python** e **Node.js** nas três clouds. API externa: [ViaCEP](https://viacep.com.br/) (`GET https://viacep.com.br/ws/{cep}/json/`).
+
+## Entrada (`CepLookup`)
 
 ```json
 {
-  "orderId": "ORD-1001",
-  "customerEmail": "cliente@example.com",
-  "amount": 150.50,
-  "currency": "BRL",
+  "cep": "01001-000",
   "simulateFailure": false
 }
 ```
 
 | Campo | Tipo | Regras |
 |-------|------|--------|
-| `orderId` | string | Obrigatório, não vazio |
-| `customerEmail` | string | Obrigatório, contém `@` |
-| `amount` | number | Obrigatório, > 0 |
-| `currency` | string | Opcional, default `BRL` |
-| `simulateFailure` | boolean | Opcional; se `true`, `ProcessPayment` falha |
+| `cep` | string | Obrigatório; 8 dígitos (com ou sem hífen) |
+| `simulateFailure` | boolean | Opcional; se `true`, `FetchCEP` falha (teste de erro) |
 
 ## Saída de sucesso
 
 ```json
 {
-  "status": "COMPLETED",
-  "orderId": "ORD-1001",
-  "paymentId": "pay-xxx",
-  "notifiedAt": "2026-01-15T12:00:00Z"
+  "status": "SUCCESS",
+  "cep": "01001000",
+  "address": {
+    "street": "Praça da Sé",
+    "complement": "lado ímpar",
+    "neighborhood": "Sé",
+    "city": "São Paulo",
+    "state": "SP",
+    "ibge": "3550308"
+  },
+  "source": "viacep",
+  "fetchedAt": "2026-01-15T12:00:00Z"
 }
 ```
 
@@ -36,42 +40,51 @@
 ```json
 {
   "status": "FAILED",
-  "orderId": "ORD-1001",
-  "step": "ValidateOrder | ProcessPayment",
-  "error": "mensagem"
+  "cep": "00000000",
+  "step": "ValidateCEP | FetchCEP",
+  "error": "CEP inválido | CEP não encontrado | ..."
 }
 ```
 
-## Funções (implementar em cada cloud)
+## Funções (implementar em cada cloud e linguagem)
 
-### ValidateOrder
+### ValidateCEP
 
-- **Input:** evento completo
-- **Output:** mesmo objeto + `validated: true`
-- **Erro:** `Invalid order` se regras violadas
+- Remove não-dígitos; exige **8 dígitos**
+- **Output:** `{ cep: "01001000", normalized: true, simulateFailure?: boolean }`
+- **Erro:** CEP inválido
 
-### ProcessPayment
+### FetchCEP
 
-- **Input:** pedido validado
-- **Output:** `{ ...order, paymentId: "pay-<uuid>", paid: true }`
-- **Erro:** se `simulateFailure` ou `amount > 10000`
+- `GET https://viacep.com.br/ws/{cep}/json/`
+- Se resposta `{"erro": true}` → CEP não encontrado
+- Se `simulateFailure` → erro simulado
+- **Output:** payload anterior + `viacep` (JSON bruto da API)
 
-### SendNotification
+### FormatResponse
 
-- **Input:** pedido pago
-- **Output:** objeto de sucesso final
-- **Side effect:** `print` / log com e-mail do cliente
+- Mapeia `viacep` → objeto `address` padronizado
+- **Output:** resposta de sucesso final
 
 ## Diagrama
 
 ```mermaid
 stateDiagram-v2
-    [*] --> ValidateOrder
-    ValidateOrder --> ProcessPayment: ok
-    ValidateOrder --> Failed: erro
-    ProcessPayment --> SendNotification: ok
-    ProcessPayment --> Failed: erro
-    SendNotification --> Completed
-    Completed --> [*]
+    [*] --> ValidateCEP
+    ValidateCEP --> FetchCEP: ok
+    ValidateCEP --> Failed: erro
+    FetchCEP --> FormatResponse: ok
+    FetchCEP --> Failed: erro / não encontrado
+    FormatResponse --> Success
+    Success --> [*]
     Failed --> [*]
 ```
+
+## CEPs para teste
+
+| CEP | Resultado |
+|-----|-----------|
+| `01001-000` | São Paulo — Praça da Sé |
+| `60175-295` | Fortaleza |
+| `00000-000` | Não encontrado (ViaCEP) |
+| `123` | Inválido (ValidateCEP) |

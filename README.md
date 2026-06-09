@@ -17,20 +17,24 @@ Serverless-Pos-Unifor/
 | Tema | Pasta | Foco |
 |------|-------|------|
 | Knative no K8s | [knative/](knative/) | KService, escala 0→N, Istio |
-| Workflow multi-cloud | [labs/step-functions/](labs/step-functions/) | Mesmo fluxo de pedido em AWS, Azure e GCP |
+| Workflow multi-cloud | [labs/step-functions/](labs/step-functions/) | Busca CEP em AWS, Azure e GCP |
 
 ## App canônica (step functions)
 
-**Processamento de pedido** — três etapas com tratamento de falha:
+**Busca de CEP** (ViaCEP) — três etapas:
 
-1. `ValidateOrder` — valida payload
-2. `ProcessPayment` — simula cobrança (pode falhar de propósito)
-3. `SendNotification` — confirma ao cliente
+1. `ValidateCEP` — normaliza e valida 8 dígitos
+2. `FetchCEP` — consulta `viacep.com.br`
+3. `FormatResponse` — endereço padronizado
+
+Implementações em **Python** e **Node.js** em cada cloud (AWS, Azure, GCP).
 
 Ver [labs/step-functions/spec/workflow.md](labs/step-functions/spec/workflow.md).
 
+**Contas e deploy nas clouds:** [labs/step-functions/CONTAS-E-DEPLOY.md](labs/step-functions/CONTAS-E-DEPLOY.md)
+
 ## Pré-requisitos gerais
 
-- Conta/créditos em AWS, Azure e GCP (ou sandbox da turma)
+- Conta/créditos em AWS, Azure e GCP — ver guia acima
 - Cluster local: [cluster/kind](cluster/kind/) + [cluster/istio](cluster/istio/) (Kind 1.36 + Istio)
 - `kubectl`, `helm`, `kind`, CLI das clouds (`aws`, `az`, `gcloud`)

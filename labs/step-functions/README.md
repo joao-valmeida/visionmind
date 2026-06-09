@@ -1,45 +1,53 @@
-# Lab — Mesma app em 3 clouds (workflows)
+# Lab — Busca de CEP em 3 clouds (Python + Node.js)
 
-Uma única aplicação de negócio implementada com orquestração serverless em **AWS**, **Azure** e **GCP**.
+Uma única aplicação — **consulta de CEP via ViaCEP** — orquestrada em **AWS**, **Azure** e **GCP**, cada uma com implementação em **Python** e **Node.js**.
 
-## App: Processamento de pedido
+**Comece aqui:** [CONTAS-E-DEPLOY.md](CONTAS-E-DEPLOY.md) — criar contas, configurar CLI e deploy passo a passo em cada cloud.
+
+## Fluxo
 
 ```
-[Pedido] → ValidateOrder → ProcessPayment → SendNotification → [OK]
-                ↓ falha              ↓ falha
-            FailState            FailState
+[CEP] → ValidateCEP → FetchCEP (ViaCEP) → FormatResponse → [endereço]
+              ↓ falha           ↓ falha
+           Failed            Failed
 ```
 
 | Etapa | Responsabilidade |
 |-------|------------------|
-| **ValidateOrder** | JSON válido, `orderId`, `amount` > 0, `customerEmail` |
-| **ProcessPayment** | Simula cobrança; falha se `amount > 10000` ou `simulateFailure: true` |
-| **SendNotification** | Retorna confirmação (log / e-mail simulado) |
+| **ValidateCEP** | Normaliza e valida 8 dígitos |
+| **FetchCEP** | HTTP GET em `viacep.com.br` |
+| **FormatResponse** | Resposta padronizada para a turma |
 
-Contrato completo: [spec/workflow.md](spec/workflow.md)  
-Payload de exemplo: [spec/events/order-created.json](spec/events/order-created.json)
+Contrato: [spec/workflow.md](spec/workflow.md)  
+Payload: [spec/events/cep-lookup.json](spec/events/cep-lookup.json)
 
-## Projetos
+## Estrutura por cloud
 
-| Cloud | Serviço de orquestração | Pasta |
-|-------|-------------------------|-------|
-| AWS | Step Functions + Lambda | [aws/](aws/) |
-| Azure | Durable Functions | [azure/](azure/) |
-| GCP | Cloud Workflows + Cloud Functions | [gcp/](gcp/) |
+```
+aws/
+  python/     # Lambda Python + Step Functions
+  nodejs/     # Lambda Node 20 + Step Functions
+azure/
+  python/     # Durable Functions (Python)
+  nodejs/     # Durable Functions (Node)
+gcp/
+  python/     # Cloud Functions + Workflows
+  nodejs/     # Cloud Functions + Workflows
+```
 
 ## Como usar na aula
 
-1. Leia o `spec/workflow.md` com a turma (contrato único).
-2. Demonstre **uma** cloud ao vivo (sugestão: AWS).
-3. Alunos replicam o fluxo nas outras duas e preenchem a tabela comparativa no README de cada pasta.
-4. Teste com payload válido e com `simulateFailure: true`.
+1. Leia `spec/workflow.md` (contrato único).
+2. Demonstre **uma** cloud + **uma** linguagem (sugestão: AWS Python).
+3. Alunos replicam nas outras clouds e/ou trocam Python ↔ Node.
+4. Teste CEP válido (`01001-000`), inválido (`123`) e `simulateFailure: true`.
 
-## Tabela comparativa (preencher com alunos)
+## Tabela comparativa
 
 | Critério | AWS | Azure | GCP |
 |----------|-----|-------|-----|
-| Linguagem do workflow | ASL (JSON) | C#/Python/Java | YAML |
-| Unidade de compute | Lambda | Function | Cloud Function |
-| Retry nativo | Sim (ASL) | Sim (policies) | Sim (`retry`) |
-| Observabilidade | CloudWatch | App Insights | Cloud Logging |
-| Deploy deste lab | SAM | `func azure functionapp` | `gcloud workflows deploy` |
+| Orquestração | Step Functions (ASL) | Durable Functions | Cloud Workflows |
+| Python | `aws/python/` | `azure/python/` | `gcp/python/` |
+| Node.js | `aws/nodejs/` | `azure/nodejs/` | `gcp/nodejs/` |
+| Deploy Python | `sam deploy` | `func start` / publish | `gcloud functions deploy` |
+| Deploy Node | `sam deploy` | `npm start` / publish | `gcloud functions deploy` |

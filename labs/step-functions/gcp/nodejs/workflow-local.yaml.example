@@ -1,0 +1,23 @@
+main:
+  params: [input]
+  steps:
+    - validate:
+        call: http.post
+        args:
+          url: https://REGION-PROJECT.cloudfunctions.net/cep-validate
+          body: ${input}
+        result: validated
+    - fetch:
+        call: http.post
+        args:
+          url: https://REGION-PROJECT.cloudfunctions.net/cep-fetch
+          body: ${validated.body}
+        result: fetched
+    - format:
+        call: http.post
+        args:
+          url: https://REGION-PROJECT.cloudfunctions.net/cep-format
+          body: ${fetched.body}
+        result: formatted
+    - done:
+        return: ${formatted.body}

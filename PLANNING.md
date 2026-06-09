@@ -5,10 +5,12 @@
 | Aula | Conteúdo | Material |
 |------|----------|----------|
 | 1.1 | FaaS vs PaaS vs containers; cold start; stateless | Slides |
-| 1.2 | Event-driven, filas, idempotência, compensação | `labs/step-functions/spec/workflow.md` |
+| 1.2 | Event-driven, HTTP serverless, APIs externas (ViaCEP) | `labs/step-functions/spec/workflow.md` |
 | 1.3 | Comparativo AWS / Azure / GCP (tabela de serviços) | README dos labs |
 
 ## Módulo 2 — Workflows (mesma app, 3 clouds)
+
+**Guia de contas + deploy:** [labs/step-functions/CONTAS-E-DEPLOY.md](labs/step-functions/CONTAS-E-DEPLOY.md)
 
 | Aula | Cloud | Lab |
 |------|-------|-----|
@@ -17,7 +19,7 @@
 | 2.3 | **GCP** — Cloud Workflows + Cloud Functions | [labs/step-functions/gcp/](labs/step-functions/gcp/) |
 | 2.4 | Discussão: retries, DLQ, observabilidade, custo | Comparar os 3 READMEs |
 
-**Objetivo:** aluno implementa o mesmo fluxo de pedido e documenta diferenças (sintaxe, deploy, billing).
+**Objetivo:** aluno implementa a mesma **busca de CEP** em Python e Node.js e documenta diferenças (sintaxe, deploy, billing).
 
 ## Módulo 3 — Knative no Kubernetes
 
@@ -39,7 +41,7 @@
 
 ## Entregáveis sugeridos (alunos)
 
-1. Deploy do workflow de pedido em **uma** cloud + diagrama ASL/YAML.
+1. Deploy do workflow de CEP em **uma** cloud + linguagem (Python ou Node) + diagrama.
 2. Deploy de um **KService** no cluster com autoscale.
 3. Relatório curto: quando usar Knative vs Lambda vs Step Functions.
 

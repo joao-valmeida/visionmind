@@ -1,38 +1,21 @@
-# GCP — Cloud Workflows + Cloud Functions (Gen2)
+# GCP — Cloud Workflows + Cloud Functions (busca CEP)
 
-Mesma app de pedido usando **Workflows** (YAML) chamando **HTTP** Cloud Functions.
+Conta, projeto e deploy detalhado: [../CONTAS-E-DEPLOY.md](../CONTAS-E-DEPLOY.md#gcp)
 
-## Arquitetura
+| Linguagem | Pasta | Runtime |
+|-----------|-------|---------|
+| Python | [python/](python/) | python312 |
+| Node.js | [nodejs/](nodejs/) | nodejs20 |
 
-```
-gcloud workflows run
-        ↓
-workflow.yaml (sequência + retry)
-        ↓
-HTTPS → Cloud Functions: validate | payment | notify
-```
-
-## Pré-requisitos
-
-- `gcloud` CLI autenticado
-- Projeto GCP com APIs: Workflows, Cloud Functions, Cloud Build
-
-```bash
-gcloud services enable workflows.googleapis.com cloudfunctions.googleapis.com run.googleapis.com
-```
-
-## Deploy das funções
-
-Ajuste `PROJECT_ID` e `REGION`:
+## Deploy functions (Python — exemplo)
 
 ```bash
 export PROJECT_ID=seu-projeto
 export REGION=southamerica-east1
 
-cd labs/step-functions/gcp
-
-for fn in validate payment notify; do
-  gcloud functions deploy order-${fn} \
+cd python
+for fn in validate fetch format; do
+  gcloud functions deploy cep-${fn} \
     --gen2 --runtime=python312 --region=$REGION \
     --source=functions/${fn} \
     --entry-point=handler \
@@ -40,41 +23,27 @@ for fn in validate payment notify; do
 done
 ```
 
-Anote as URLs retornadas (`uri`).
-
-## Deploy do workflow
-
-Edite `workflow.yaml` substituindo os placeholders `VALIDATE_URL`, `PAYMENT_URL`, `NOTIFY_URL` pelas URLs das functions.
+## Deploy functions (Node.js)
 
 ```bash
-gcloud workflows deploy order-processing \
-  --source=workflow.yaml \
-  --location=$REGION
+cd nodejs
+for fn in validate fetch format; do
+  gcloud functions deploy cep-${fn} \
+    --gen2 --runtime=nodejs20 --region=$REGION \
+    --source=functions/${fn} \
+    --entry-point=handler \
+    --trigger-http --allow-unauthenticated
+done
 ```
 
-## Executar
+## Workflow
+
+Substitua URLs em `workflow.yaml` pelas URIs das functions e:
 
 ```bash
-gcloud workflows run order-processing \
-  --location=$REGION \
-  --data="$(cat ../spec/events/order-created.json)"
+gcloud workflows deploy cep-lookup --source=workflow.yaml --location=$REGION
+gcloud workflows run cep-lookup --location=$REGION \
+  --data="$(cat ../spec/events/cep-lookup.json)"
 ```
 
-## Arquivos
-
-| Arquivo | Descrição |
-|---------|-----------|
-| `workflow.yaml` | Definição Cloud Workflows |
-| `functions/*/main.py` | Lógica (espelho das Lambdas AWS) |
-
-## Comparar com AWS/Azure
-
-| Aspecto | GCP Workflows |
-|---------|----------------|
-| Sintaxe | YAML declarativo |
-| Compute | Cloud Functions Gen2 (HTTP) |
-| Estado | Gerenciado pelo Workflows |
-
-## Exercício
-
-Trocar `--allow-unauthenticated` por IAM (OIDC) e usar `auth` no passo HTTP do workflow.
+Lab sem OIDC: use `workflow-local.yaml.example` (HTTP sem auth).

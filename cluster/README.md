@@ -25,8 +25,8 @@ Antes de `kind create cluster`, substitua no YAML:
 | Placeholder | Uso |
 |-------------|-----|
 | `IP-A-ALTERAR` | IP da VM/host onde o Kind roda (ex. `192.168.56.10`) |
-| `PORTA-KUBE-API-A-ALTERAR` | Porta exposta da API (ex. `6443`) |
-| `PORTA-ISTIO-HTTP-A-ALTERAR` | Porta HTTP do ingress Istio no host (ex. `80` ou `8080`) |
+| `PORTA-KUBE-API-A-ALTERAR` | Porta da API em `networking.apiServerPort` (ex. `6443`) — **não** duplicar em `extraPortMappings` |
+| `PORTA-ISTIO-HTTP-A-ALTERAR` | Porta HTTP Istio em `extraPortMappings` (ex. `8080`) |
 
 ```bash
 # Linux/macOS — exemplo
