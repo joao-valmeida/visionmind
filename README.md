@@ -1,40 +1,50 @@
 # Serverless — Pós-Graduação Unifor
 
-Material de planejamento e laboratórios para aulas de **serverless** em múltiplas plataformas.
+Material de planejamento, teoria e laboratórios para o curso de **Serverless Computing**.
 
-## Estrutura
+## Estrutura do Repositório
 
-```
+```text
 Serverless-Pos-Unifor/
-  PLANNING.md                 # Roteiro de aulas
-  cluster/                    # Kind + Istio (lab local)
-  knative/                    # Kubernetes serverless (Helm + docs)
-  labs/step-functions/        # Mesma app, 3 clouds
+├── Apostila_Serverless_UNIFOR.docx    # Material teórico de apoio
+├── PLANNING.md                        # Roteiro detalhado das aulas
+├── Plano_de_Ensino_Serverless.docx    # Plano pedagógico
+├── Slides_Serverless_UNIFOR.pptx      # Slides das aulas
+├── cluster/                           # Setup de Kind + Istio (lab local)
+├── knative/                           # Kubernetes Serverless (Helm + documentação)
+├── exercicios/                        # Laboratórios práticos por cloud
+│   ├── exercicio1/                    # API CRUD (AWS/GCP/Azure)
+│   ├── exercicio2/                    # Event-Driven (S3/Storage triggers)
+│   └── exercicio3/                    # Filas, VPC e DB Relacional
+├── trabalhos/                         # Projetos de referência e avaliação
+│   ├── produto1-ecotrack/             # Calculadora de Carbono (API)
+│   ├── produto2-swiftpay/             # Processador de Pagamentos (SQS)
+│   └── produto3-visionmind/           # Análise de Imagens (Eventos)
+└── labs/                              # Workflows complexos (em desenvolvimento)
 ```
 
-## Laboratórios
+## Conteúdo Programático
 
-| Tema | Pasta | Foco |
-|------|-------|------|
-| Knative no K8s | [knative/](knative/) | KService, escala 0→N, Istio |
-| Workflow multi-cloud | [labs/step-functions/](labs/step-functions/) | Busca CEP em AWS, Azure e GCP |
+### 1. Infraestrutura Local e Knative
+Foco em entender a abstração de containers para serverless no Kubernetes.
+- [cluster/](cluster/): Provisionamento de cluster `kind` com `istio`.
+- [knative/](knative/): Deploy de KServices, escala 0→N e roteamento de tráfego.
 
-## App canônica (step functions)
+### 2. Laboratórios em Cloud (AWS, Azure, GCP)
+Exercícios práticos para dominar os principais provedores de nuvem.
+- **[Exercicio 1](exercicios/exercicio1/):** CRUD Serverless com API Gateway e NoSQL.
+- **[Exercicio 2](exercicios/exercicio2/):** Arquiteturas orientadas a eventos (Storage triggers).
+- **[Exercicio 3](exercicios/exercicio3/):** Integração com VPC, Filas (SQS/PubSub) e Bancos de Dados Relacionais.
 
-**Busca de CEP** (ViaCEP) — três etapas:
+### 3. Projetos de Referência (Trabalhos)
+Aplicações "canônicas" simulando startups reais:
+- **EcoTrack:** API de cálculos de sustentabilidade.
+- **SwiftPay:** Worker assíncrono para processamento de transações.
+- **VisionMind:** Pipeline de inteligência artificial disparado por upload de arquivos.
 
-1. `ValidateCEP` — normaliza e valida 8 dígitos
-2. `FetchCEP` — consulta `viacep.com.br`
-3. `FormatResponse` — endereço padronizado
+## Pré-requisitos Gerais
 
-Implementações em **Python** e **Node.js** em cada cloud (AWS, Azure, GCP).
-
-Ver [labs/step-functions/spec/workflow.md](labs/step-functions/spec/workflow.md).
-
-**Contas e deploy nas clouds:** [labs/step-functions/CONTAS-E-DEPLOY.md](labs/step-functions/CONTAS-E-DEPLOY.md)
-
-## Pré-requisitos gerais
-
-- Conta/créditos em AWS, Azure e GCP — ver guia acima
-- Cluster local: [cluster/kind](cluster/kind/) + [cluster/istio](cluster/istio/) (Kind 1.36 + Istio)
-- `kubectl`, `helm`, `kind`, CLI das clouds (`aws`, `az`, `gcloud`)
+- Contas ativas com créditos em AWS, Azure e GCP.
+- Ferramentas locais: `kubectl`, `helm`, `kind`, `docker`.
+- CLI das nuvens instaladas e configuradas (`aws`, `az`, `gcloud`).
+- `terraform` e `aws-sam-cli` para os deploys automatizados.

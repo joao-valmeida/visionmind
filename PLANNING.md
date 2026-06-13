@@ -8,20 +8,26 @@
 | 1.2 | Event-driven, HTTP serverless, APIs externas (ViaCEP) | `labs/step-functions/spec/workflow.md` |
 | 1.3 | Comparativo AWS / Azure / GCP (tabela de serviços) | README dos labs |
 
-## Módulo 2 — Workflows (mesma app, 3 clouds)
+## Módulo 2 — Laboratórios Cloud (AWS, Azure, GCP)
 
-**Guia de contas + deploy:** [labs/step-functions/CONTAS-E-DEPLOY.md](labs/step-functions/CONTAS-E-DEPLOY.md)
+**Objetivo:** O aluno implementa padrões fundamentais em cada provedor para entender as diferenças de sintaxe, infraestrutura (Terraform/SAM) e billing.
 
-| Aula | Cloud | Lab |
-|------|-------|-----|
-| 2.1 | **AWS** — Lambda + Step Functions (ASL) | [labs/step-functions/aws/](labs/step-functions/aws/) |
-| 2.2 | **Azure** — Durable Functions (orquestrador + activities) | [labs/step-functions/azure/](labs/step-functions/azure/) |
-| 2.3 | **GCP** — Cloud Workflows + Cloud Functions | [labs/step-functions/gcp/](labs/step-functions/gcp/) |
-| 2.4 | Discussão: retries, DLQ, observabilidade, custo | Comparar os 3 READMEs |
+| Aula | Tema | Pasta |
+|------|------|-------|
+| 2.1 | API CRUD (API Gateway + Functions + NoSQL) | [exercicios/exercicio1/](exercicios/exercicio1/) |
+| 2.2 | Event-Driven (Storage Triggers + Event Bridge) | [exercicios/exercicio2/](exercicios/exercicio2/) |
+| 2.3 | Mensageria e VPC (Filas + RDBMS Privado) | [exercicios/exercicio3/](exercicios/exercicio3/) |
+| 2.4 | Discussão: Retries, Observabilidade e Custos | Comparar deploys |
 
-**Objetivo:** aluno implementa a mesma **busca de CEP** em Python e Node.js e documenta diferenças (sintaxe, deploy, billing).
+## Módulo 3 — Projetos Práticos (Trabalhos)
 
-## Módulo 3 — Knative no Kubernetes
+Cenários reais de startups para aplicação dos conceitos aprendidos.
+
+- **EcoTrack:** Foco em APIs síncronas e Cache. [trabalhos/produto1-ecotrack/](trabalhos/produto1-ecotrack/)
+- **SwiftPay:** Foco em processamento em fila e alta escala. [trabalhos/produto2-swiftpay/](trabalhos/produto2-swiftpay/)
+- **VisionMind:** Foco em pipelines de processamento de mídia. [trabalhos/produto3-visionmind/](trabalhos/produto3-visionmind/)
+
+## Módulo 4 — Knative no Kubernetes
 
 | Aula | Conteúdo | Material |
 |------|----------|----------|
