@@ -1,0 +1,14 @@
+service: ecotrack-api
+
+provider:
+  name: aws
+  runtime: python3.9
+  region: us-east-1
+
+functions:
+  api:
+    handler: app.lambda_handler
+    events:
+      - http:
+          path: calculate
+          method: post

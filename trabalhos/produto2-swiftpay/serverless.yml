@@ -1,0 +1,23 @@
+service: swiftpay-worker
+
+provider:
+  name: aws
+  runtime: python3.9
+  region: us-east-1
+
+functions:
+  webhook:
+    handler: app.lambda_handler
+    events:
+      - http:
+          path: webhook/payment
+          method: post
+      - sqs:
+          arn: !GetAtt PaymentQueue.Arn
+
+resources:
+  Resources:
+    PaymentQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: swiftpay-payments-queue

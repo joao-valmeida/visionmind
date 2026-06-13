@@ -1,0 +1,42 @@
+service: exercicio3-queue-vpc
+
+provider:
+  name: aws
+  runtime: python3.9
+  region: us-east-1
+  vpc:
+    securityGroupIds:
+      - sg-xxxxxxxx # Replace with SG ID
+    subnetIds:
+      - subnet-xxxxxx # Replace with Private Subnet IDs
+
+functions:
+  processor:
+    handler: handler.handler
+    events:
+      - sqs:
+          arn: !GetAtt MessageQueue.Arn
+    environment:
+      DB_HOST: ${env:DB_HOST}
+      DB_NAME: ${env:DB_NAME}
+      DB_USER: ${env:DB_USER}
+      DB_PASSWORD: ${env:DB_PASSWORD}
+
+resources:
+  Resources:
+    MessageQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:service}-queue
+
+    # Simplified Aurora Serverless v2 for reference
+    # In a real scenario, this would be much longer
+    DBCluster:
+      Type: AWS::RDS::DBCluster
+      Properties:
+        Engine: aurora-postgresql
+        EngineMode: provisioned
+        ServerlessV2ScalingConfiguration:
+          MinCapacity: 0.5
+          MaxCapacity: 2.0
+        # ... VPC configs, etc.

@@ -1,0 +1,28 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: SwiftPay Worker (SAM)
+
+Resources:
+  PaymentQueue:
+    Type: AWS::SQS::Queue
+
+  SwiftPayFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      CodeUri: ./
+      Events:
+        PaymentApi:
+          Type: Api
+          Properties:
+            Path: /webhook/payment
+            Method: post
+        PaymentSQS:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt PaymentQueue.Arn
+
+Outputs:
+  ApiUrl:
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/webhook/payment"
