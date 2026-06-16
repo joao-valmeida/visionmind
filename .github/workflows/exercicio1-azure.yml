@@ -64,4 +64,5 @@ jobs:
         working-directory: exercicios/exercicio1/azure
         env:
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-        run: npx serverless ${{ github.event.inputs.action }} --no-login
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: npx serverless ${{ github.event.inputs.action }}
