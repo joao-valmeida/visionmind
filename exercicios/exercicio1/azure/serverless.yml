@@ -4,7 +4,7 @@ provider:
   name: azure
   region: East US
   runtime: python3.8
-  authType: msi
+  authType: servicePrincipal
   # Resource Group e Storage Account serão criados automaticamente se não especificados
   # Mas você pode apontar para os criados pelo Terraform se preferir
 
