@@ -72,4 +72,4 @@ jobs:
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-        run: npx serverless ${{ github.event.inputs.action }}
+        run: npx serverless ${{ github.event.inputs.action }} --force
