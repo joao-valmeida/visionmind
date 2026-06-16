@@ -60,6 +60,11 @@ jobs:
         working-directory: exercicios/exercicio1/azure
         run: npm install
 
+      - name: Register Azure Resource Providers
+        run: |
+          az provider register --namespace 'microsoft.insights'
+          az provider register --namespace 'microsoft.operationalinsights'
+
       - name: Serverless Deploy/Remove
         working-directory: exercicios/exercicio1/azure
         env:
