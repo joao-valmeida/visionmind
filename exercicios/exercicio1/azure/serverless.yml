@@ -1,0 +1,22 @@
+service: exercicio1-azure
+
+provider:
+  name: azure
+  region: East US
+  runtime: python3.9
+  # Resource Group e Storage Account serão criados automaticamente se não especificados
+  # Mas você pode apontar para os criados pelo Terraform se preferir
+
+plugins:
+  - serverless-azure-functions
+
+functions:
+  handle_items:
+    handler: function_app.py
+    events:
+      - http: true
+        methods:
+          - GET
+          - POST
+        authLevel: anonymous
+        route: items

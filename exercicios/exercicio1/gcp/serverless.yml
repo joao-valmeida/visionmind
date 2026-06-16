@@ -1,0 +1,16 @@
+service: exercicio1-gcp
+
+provider:
+  name: google
+  runtime: python39
+  region: us-central1
+  project: ${env:GCP_PROJECT_ID} # Pegando do environment
+
+plugins:
+  - serverless-google-cloudfunctions
+
+functions:
+  handle_items:
+    handler: handle_items
+    events:
+      - http: path

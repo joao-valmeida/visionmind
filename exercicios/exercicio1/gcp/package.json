@@ -1,0 +1,9 @@
+{
+  "name": "exercicio1-gcp",
+  "version": "1.0.0",
+  "description": "Exercise 1 GCP Cloud Functions with Serverless Framework",
+  "devDependencies": {
+    "serverless": "^3.0.0",
+    "serverless-google-cloudfunctions": "^4.0.0"
+  }
+}

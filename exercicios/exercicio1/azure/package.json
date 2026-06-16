@@ -1,0 +1,9 @@
+{
+  "name": "exercicio1-azure",
+  "version": "1.0.0",
+  "description": "Exercise 1 Azure Functions with Serverless Framework",
+  "devDependencies": {
+    "serverless": "^3.0.0",
+    "serverless-azure-functions": "^2.1.0"
+  }
+}
