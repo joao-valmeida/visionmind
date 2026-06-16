@@ -1,0 +1,99 @@
+name: Exercicio 1 AWS Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Ação a ser executada (deploy ou delete)'
+        required: true
+        default: 'deploy'
+        type: choice
+        options:
+          - deploy
+          - delete
+
+jobs:
+  test:
+    name: Run Python Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install test dependencies
+        working-directory: exercicios/exercicio1/aws
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-test.txt
+
+      - name: Run tests
+        working-directory: exercicios/exercicio1/aws
+        run: |
+          export PYTHONPATH=$PYTHONPATH:$(pwd)
+          pytest tests/
+
+  deploy:
+    name: Deploy to AWS
+    needs: test
+    if: github.event.inputs.action == 'deploy'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::960583973883:role/github-identity-provider
+          aws-region: us-east-2
+
+      - name: Set up SAM
+        uses: aws-actions/setup-sam@v2
+
+      - name: SAM Build
+        working-directory: exercicios/exercicio1/aws
+        run: sam build --template-file template.yaml
+
+      - name: SAM Deploy
+        working-directory: exercicios/exercicio1/aws
+        run: |
+          sam deploy \
+            --stack-name teste-exercicio1 \
+            --capabilities CAPABILITY_IAM \
+            --region us-east-2 \
+            --no-confirm-changeset \
+            --no-fail-on-empty-changeset \
+            --resolve-s3
+
+  delete:
+    name: Delete AWS Stack
+    if: github.event.inputs.action == 'delete'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::960583973883:role/github-identity-provider
+          aws-region: us-east-2
+
+      - name: Set up SAM
+        uses: aws-actions/setup-sam@v2
+
+      - name: SAM Delete
+        working-directory: exercicios/exercicio1/aws
+        run: |
+          sam delete \
+            --stack-name teste-exercicio1 \
+            --region us-east-2 \
+            --no-prompts
