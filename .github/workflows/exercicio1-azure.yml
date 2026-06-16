@@ -12,6 +12,10 @@ on:
           - deploy
           - remove
 
+permissions:
+  contents: read 
+  id-token: write
+
 jobs:
   test:
     name: Run Python Tests
