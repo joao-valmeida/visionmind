@@ -2,13 +2,35 @@ provider "azurerm" {
   features {}
 }
 
+variable "location" {
+  description = "Azure region used by exercise 1 resources."
+  type        = string
+  default     = "East US"
+}
+
+variable "resource_prefix" {
+  description = "Prefix for exercise 1 resource names."
+  type        = string
+  default     = "exercicio1"
+}
+
+resource "random_id" "suffix" {
+  byte_length = 4
+}
+
+locals {
+  name_prefix    = lower(replace(var.resource_prefix, "_", "-"))
+  name_suffix    = random_id.suffix.hex
+  storage_prefix = lower(replace(var.resource_prefix, "/[^0-9a-z]/", ""))
+}
+
 resource "azurerm_resource_group" "rg" {
-  name     = "exercicio1-rg"
-  location = "East US"
+  name     = "${local.name_prefix}-rg-${local.name_suffix}"
+  location = var.location
 }
 
 resource "azurerm_storage_account" "sa" {
-  name                     = "exercicio1sa"
+  name                     = substr("${local.storage_prefix}${local.name_suffix}", 0, 24)
   resource_group_name      = azurerm_resource_group.rg.name
   location                 = azurerm_resource_group.rg.location
   account_tier             = "Standard"
@@ -16,7 +38,7 @@ resource "azurerm_storage_account" "sa" {
 }
 
 resource "azurerm_service_plan" "sp" {
-  name                = "exercicio1-sp"
+  name                = "${local.name_prefix}-sp-${local.name_suffix}"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
   os_type             = "Linux"
@@ -24,7 +46,7 @@ resource "azurerm_service_plan" "sp" {
 }
 
 resource "azurerm_cosmosdb_account" "cosmos" {
-  name                = "exercicio1-cosmos"
+  name                = "${local.name_prefix}-cosmos-${local.name_suffix}"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   offer_type          = "Standard"
@@ -41,7 +63,7 @@ resource "azurerm_cosmosdb_account" "cosmos" {
 }
 
 resource "azurerm_linux_function_app" "fa" {
-  name                = "exercicio1-function-app"
+  name                = "${local.name_prefix}-function-app-${local.name_suffix}"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
 
@@ -56,6 +78,6 @@ resource "azurerm_linux_function_app" "fa" {
   }
 
   app_settings = {
-    "CosmosDBConnection" = azurerm_cosmosdb_account.cosmos.connection_strings[0]
+    "CosmosDBConnection" = "AccountEndpoint=${azurerm_cosmosdb_account.cosmos.endpoint};AccountKey=${azurerm_cosmosdb_account.cosmos.primary_key};"
   }
 }

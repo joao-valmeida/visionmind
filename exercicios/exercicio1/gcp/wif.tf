@@ -1,8 +1,3 @@
-provider "google" {
-  project = var.project_id
-  region  = "us-central1"
-}
-
 variable "project_id" {
   description = "GCP Project ID"
   type        = string
@@ -15,21 +10,21 @@ variable "github_repository" {
 
 # 1. Workload Identity Pool
 resource "google_iam_workload_identity_pool" "github_pool" {
-  workload_identity_pool_id = "github-pool-exercicio"
+  workload_identity_pool_id = "${var.resource_prefix}-github-pool"
   display_name              = "GitHub Actions Pool"
-  description              = "Pool for GitHub Actions OIDC"
+  description               = "Pool for GitHub Actions OIDC"
 }
 
 # 2. OIDC Provider
 resource "google_iam_workload_identity_pool_provider" "github_provider" {
   workload_identity_pool_id          = google_iam_workload_identity_pool.github_pool.workload_identity_pool_id
-  workload_identity_pool_provider_id = "github-provider"
+  workload_identity_pool_provider_id = "${var.resource_prefix}-github-provider"
   display_name                       = "GitHub Actions Provider"
-  
+
   attribute_mapping = {
     "google.subject"       = "assertion.sub"
-    "attribute.actor"       = "assertion.actor"
-    "attribute.repository"  = "assertion.repository"
+    "attribute.actor"      = "assertion.actor"
+    "attribute.repository" = "assertion.repository"
   }
 
   attribute_condition = "assertion.repository == '${var.github_repository}'"
@@ -41,7 +36,7 @@ resource "google_iam_workload_identity_pool_provider" "github_provider" {
 
 # 3. Service Account
 resource "google_service_account" "github_deployer" {
-  account_id   = "github-deployer-exercicio"
+  account_id   = "${var.resource_prefix}-github-deployer"
   display_name = "Service Account for GitHub Actions"
 }
 

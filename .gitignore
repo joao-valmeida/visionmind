@@ -1,1 +1,9 @@
 .idea/
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+function-source.zip
+google-cloud-cli-*.tar.gz
+google-cloud-sdk/
