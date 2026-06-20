@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       action:
-        description: 'Ação a ser executada (deploy ou remove)'
+        description: 'Ação a ser executada (deploy ou delete)'
         required: true
         default: 'deploy'
         type: choice
         options:
           - deploy
-          - remove
+          - delete
 
 jobs:
   test:
@@ -36,6 +36,7 @@ jobs:
   deploy:
     name: Deploy to GCP
     needs: test
+    if: github.event.inputs.action == 'deploy'
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -58,8 +59,39 @@ jobs:
         working-directory: exercicios/exercicio1/gcp
         run: npm install
 
-      - name: Serverless Deploy/Remove
+      - name: Serverless Deploy
         working-directory: exercicios/exercicio1/gcp
         env:
           GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-        run: npx serverless ${{ github.event.inputs.action }}
+        run: npx serverless deploy
+
+  delete:
+    name: Delete GCP Stack
+    if: github.event.inputs.action == 'delete'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install SLS Dependencies
+        working-directory: exercicios/exercicio1/gcp
+        run: npm install
+
+      - name: Serverless Remove
+        working-directory: exercicios/exercicio1/gcp
+        env:
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+        run: npx serverless remove
