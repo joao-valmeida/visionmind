@@ -1,0 +1,63 @@
+pipeline {
+    agent any // Execução nativa nas runners Windows
+
+    stages {
+        stage('Análise de Segurança Estática (SAST)') {
+            steps {
+                // Varredura no código-fonte Python procurando injeções e falhas
+                powershell 'semgrep scan --config auto --error'
+            }
+        }
+
+        stage('Análise de Composição (SCA)') {
+            steps {
+                // Gera o SBOM das dependências com cdxgen e envia para o Dependency Track
+                powershell '''
+                    Write-Host "Gerando SBOM com cdxgen..."
+                    cdxgen -o bom.json
+                    
+                    Write-Host "Enviando para o Dependency Track..."
+                    # Substitua as variáveis de URL e API Key do seu servidor Dependency Track
+                    $apiUrl = "http://seu-dependency-track/api/v1/bom"
+                    $apiKey = $env:DEPENDENCY_TRACK_API_KEY
+                    
+                    # Chamada nativa PowerShell para o upload (sem dependência de curl)
+                    # O código exato do Invoke-RestMethod vai depender do payload exigido pela API
+                '''
+            }
+        }
+
+        stage('Empacotamento (Build)') {
+            steps {
+                powershell '''
+                    $SourceFile = "app.py"
+                    $PackageName = "app.zip"
+                    
+                    if (Test-Path $PackageName) {
+                        Remove-Item $PackageName -Force
+                    }
+                    
+                    Compress-Archive -Path $SourceFile -DestinationPath $PackageName -Force
+                    Write-Host "Pacote $PackageName gerado com sucesso."
+                '''
+            }
+        }
+
+        stage('Deploy (Terraform)') {
+            steps {
+                withCredentials([aws(credentialsId: 'aws-deploy-key', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                    powershell '''
+                        terraform init
+                        terraform apply -auto-approve
+                    '''
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            powershell 'Write-Host "Pipeline de DevSecOps finalizada."'
+        }
+    }
+}
