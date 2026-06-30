@@ -1,0 +1,17 @@
+service: visionmind-analyzer
+
+provider:
+  name: aws
+  runtime: python3.9
+  region: us-east-1
+
+functions:
+  analyzer:
+    handler: app.lambda_handler
+    events:
+      - s3:
+          bucket: visionmind-uploads-${aws:accountId}
+          event: s3:ObjectCreated:*
+      - http:
+          path: analyze
+          method: post
