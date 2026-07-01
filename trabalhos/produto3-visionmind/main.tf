@@ -5,7 +5,7 @@ provider "aws" {
 # 1. Banco de Dados (DynamoDB)
 resource "aws_dynamodb_table" "metadata" {
   name         = "ImageMetadata"
-  billing_mode = "PAY_PER_REQUEST" # FinOps: Paga apenas pelo que usar
+  billing_mode = "PAY_PER_REQUEST"
   hash_key     = "imageId"
 
   attribute {
@@ -20,7 +20,7 @@ resource "aws_s3_bucket" "images" {
   force_destroy = true
 }
 
-# 3. Segurança: IAM Role (Least Privilege)
+# 3. Segurança: IAM Role e Políticas Consolidadas
 resource "aws_iam_role" "lambda_exec" {
   name = "visionmind_lambda_role"
   assume_role_policy = jsonencode({
@@ -40,25 +40,21 @@ resource "aws_iam_policy" "lambda_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        # Permissão restrita apenas ao bucket do projeto
         Effect   = "Allow"
         Action   = ["s3:GetObject"]
         Resource = "${aws_s3_bucket.images.arn}/*"
       },
       {
-        # O Rekognition não tem "resource specific ARN", então o '*' é obrigatório aqui
         Effect   = "Allow"
         Action   = ["rekognition:DetectLabels"]
         Resource = "*"
       },
       {
-        # Permissão de escrita restrita apenas à tabela criada
         Effect   = "Allow"
-        Action   = ["dynamodb:PutItem"]
+        Action   = ["dynamodb:PutItem", "dynamodb:UpdateItem"]
         Resource = aws_dynamodb_table.metadata.arn
       },
       {
-        # Permissão básica para gerar logs de observabilidade
         Effect   = "Allow"
         Action   = ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"]
         Resource = "arn:aws:logs:*:*:*"
@@ -74,7 +70,7 @@ resource "aws_iam_role_policy_attachment" "lambda_attach" {
 
 # 4. Computação (AWS Lambda)
 resource "aws_lambda_function" "analyzer" {
-  filename         = "app.zip" # O arquivo compactado gerado na esteira
+  filename         = "app.zip"
   function_name    = "VisionMindAnalyzer"
   role             = aws_iam_role.lambda_exec.arn
   handler          = "app.lambda_handler"
