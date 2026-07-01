@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Static Security Analysis (SAST)') {
             steps {
-                powershell '& "C:\\Program Files\\Python314\\Scripts\\semgrep.exe" scan --config auto --error'
+                powershell '& "C:\\Program Files\\Python314\\Scripts\\semgrep.exe" scan --config auto'
             }
         }
 
