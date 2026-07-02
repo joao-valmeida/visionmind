@@ -86,15 +86,34 @@ graph TD
 
 ### **5.3. FinOps e Estimativa de Custo (TCO)**
 
-As configurações (como o DynamoDB em modo *Pay-Per-Request* e o limite de tags MaxLabels=10 no Rekognition) visam otimizar custos.
+A arquitetura opera no modelo **Pay-as-you-go**, sem custos fixos de infraestrutura ociosa. As estimativas abaixo foram baseadas nos preços públicos da [AWS Pricing Calculator](https://calculator.aws/pricing/2/estimator) na região `us-east-1`, julho de 2026.
 
-**Estimativa Mensal (Cenário de 10.000 imagens/mês, 2MB média):**
+O **Amazon Rekognition é o principal driver de custo** (~87% do total), cobrado por imagem analisada independentemente do volume de dados. As configurações adotadas (DynamoDB em modo *Pay-Per-Request* e limite `MaxLabels=10` no Rekognition) visam minimizar esse gasto desde a baseline.
 
-* **S3:** \~$0.46  
-* **Lambda:** $0.00 (Free Tier)  
-* **DynamoDB:** $0.00 (Free Tier)  
-* **Rekognition:** $10.00 ($1.00 por mil imagens)  
-* **Total Estimado:** **\~$10.46 / mês**
+#### **Estimativa Mensal por Cenário**
+
+| Serviço | MVP · 1k imgs/mês | Startup · 50k imgs/mês | Escala · 500k imgs/mês |
+|---|---|---|---|
+| Amazon Rekognition | $1,00 | $50,00 | $500,00 |
+| AWS Lambda | $0,00* | $0,83 | $8,30 |
+| Amazon S3 | $0,02 | $1,15 | $11,50 |
+| Amazon DynamoDB | $0,00* | $0,06 | $0,63 |
+| Amazon API Gateway | $0,00* | $5,00 | $50,00 |
+| **Total/mês** | **~$1,02** | **~$57,04** | **~$570,43** |
+| **TCO anual** | **~$12** | **~$685** | **~$6.845** |
+
+*\*Coberto pelo AWS Free Tier (1M req Lambda, 25 GB DynamoDB, 1M req API Gateway por mês).*
+
+#### **Estratégias de Otimização**
+
+Como o Rekognition concentra a maior parte do gasto, as otimizações são priorizadas para reduzir chamadas à API de IA antes de qualquer outra frente:
+
+1. **Cache de resultados do Rekognition:** Armazenar o hash SHA-256 de cada imagem no DynamoDB e consultar antes de invocar o Rekognition. Em acervos com imagens duplicadas ou reprocessadas, reduz 30–60% das chamadas à IA — maior impacto isolado.
+2. **Graviton (ARM64) na Lambda:** Alterar `Architectures: arm64` no `template.yaml`. Redução de ~20% no custo de compute com zero mudança de código.
+3. **S3 Intelligent-Tiering:** Imagens já processadas raramente são relidas. A transição automática para Infrequent Access reduz o custo de storage em ~40%.
+4. **DynamoDB Provisioned em escala:** Acima de ~200k imagens/mês, migrar de On-demand para Provisioned Capacity com Auto Scaling oferece economia de até 70% no banco de dados.
+
+Com a aplicação das estratégias acima no cenário de 50k imagens/mês, o custo mensal estimado cai de **$57,04 para ~$36,00 (~37% de redução)**.
 
 ## **6\. Estratégia de CI/CD e Qualidade (DevSecOps)**
 
