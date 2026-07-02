@@ -4,7 +4,7 @@
 
 **Data:** 30 de Junho de 2026
 
-**Status:** Aprovado / Em Implementação
+**Status:** Validado
 
 ## **Sumário**
 
@@ -111,22 +111,21 @@ O **Amazon Rekognition é o principal driver de custo** (~87% do total), cobrado
 | AWS Lambda | $0,00* | $0,83 | $8,30 |
 | Amazon S3 | $0,02 | $1,15 | $11,50 |
 | Amazon DynamoDB | $0,00* | $0,06 | $0,63 |
-| Amazon API Gateway | $0,00* | $5,00 | $50,00 |
-| **Total/mês** | **~$1,02** | **~$57,04** | **~$570,43** |
-| **TCO anual** | **~$12** | **~$685** | **~$6.845** |
+| **Total/mês** | **~$1,02** | **~$52,04** | **~$520,43** |
+| **TCO anual** | **~$12** | **~$624** | **~$6.245** |
 
-*\*Coberto pelo AWS Free Tier (1M req Lambda, 25 GB DynamoDB, 1M req API Gateway por mês).*
+*\*Coberto pelo AWS Free Tier (1M req Lambda e 25 GB DynamoDB por mês).*
 
 #### **Estratégias de Otimização**
 
 Como o Rekognition concentra a maior parte do gasto, as otimizações são priorizadas para reduzir chamadas à API de IA antes de qualquer outra frente:
 
 1. **Cache de resultados do Rekognition:** Armazenar o hash SHA-256 de cada imagem no DynamoDB e consultar antes de invocar o Rekognition. Em acervos com imagens duplicadas ou reprocessadas, reduz 30–60% das chamadas à IA — maior impacto isolado.
-2. **Graviton (ARM64) na Lambda:** Alterar `Architectures: arm64` no `template.yaml`. Redução de ~20% no custo de compute com zero mudança de código.
+2. **Graviton (ARM64) na Lambda:** Alterar o parâmetro `architectures = ["arm64"]` no bloco da função dentro do `main.tf`. Redução de ~20% no custo de compute com zero mudança de código.
 3. **S3 Intelligent-Tiering:** Imagens já processadas raramente são relidas. A transição automática para Infrequent Access reduz o custo de storage em ~40%.
 4. **DynamoDB Provisioned em escala:** Acima de ~200k imagens/mês, migrar de On-demand para Provisioned Capacity com Auto Scaling oferece economia de até 70% no banco de dados.
 
-Com a aplicação das estratégias acima no cenário de 50k imagens/mês, o custo mensal estimado cai de **$57,04 para ~$36,00 (~37% de redução)**.
+Com a aplicação das estratégias acima no cenário de 50k imagens/mês, o custo mensal estimado cai de **$52,04 para ~$33,00 (~36% de redução)**.
 
 ## **6\. Estratégia de CI/CD e Qualidade (DevSecOps)**
 
