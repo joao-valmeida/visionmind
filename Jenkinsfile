@@ -21,17 +21,43 @@ pipeline {
             }
         }
 
+        stage('Install Dependencies') {
+            steps {
+                powershell '''
+                    $BuildDir = "lambda_build"
+                    
+                    if (Test-Path $BuildDir) {
+                        Remove-Item $BuildDir -Recurse -Force
+                    }
+                    New-Item -ItemType Directory -Force -Path $BuildDir | Out-Null
+                    
+                    if (Test-Path "requirements.txt") {
+                        Write-Host "Installing dependencies from requirements.txt into $BuildDir..."
+                        pip install -r requirements.txt -t $BuildDir
+                    } else {
+                        Write-Host "No requirements.txt found. Skipping dependency installation."
+                    }
+                '''
+            }
+        }
+
         stage('Packaging (Build)') {
             steps {
                 powershell '''
                     $SourceFile = "app.py"
                     $PackageName = "app.zip"
+                    $BuildDir = "lambda_build"
                     
                     if (Test-Path $PackageName) {
                         Remove-Item $PackageName -Force
                     }
                     
-                    Compress-Archive -Path $SourceFile -DestinationPath $PackageName -Force
+                    Write-Host "Copying source code to build directory..."
+                    Copy-Item -Path $SourceFile -Destination $BuildDir\
+                    
+                    Write-Host "Packaging everything for AWS Lambda..."
+                    Compress-Archive -Path "$BuildDir\\*" -DestinationPath $PackageName -Force
+                    
                     Write-Host "Package $PackageName successfully generated."
                 '''
             }
