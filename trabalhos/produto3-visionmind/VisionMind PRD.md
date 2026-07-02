@@ -59,17 +59,29 @@ A escolha da Amazon Web Services (AWS) baseia-se na forte integração nativa en
 * **IA Vision:** Amazon Rekognition (DetectLabels).  
 * **Banco de Dados:** Amazon DynamoDB (NoSQL).
 
+### **Fluxo AWS do Projeto**
+
+1. O usuário ou sistema parceiro envia uma imagem JPEG/PNG para o bucket Amazon S3.
+2. O S3 detecta o evento de criação do objeto e dispara a execução da AWS Lambda.
+3. A Lambda valida a extensão da imagem para aceitar apenas arquivos permitidos.
+4. A função chama o Amazon Rekognition para identificar objetos, cenas e etiquetas da imagem.
+5. O resultado da análise é montado em um payload com tags e nível de confiança.
+6. A Lambda grava os metadados no Amazon DynamoDB para consulta posterior.
+7. O sistema retorna status de processamento e deixa o dado pronto para busca e catalogação.
+
 ### **Diagrama Arquitetural**
 
 *(Abaixo, a representação em Mermaid da arquitetura. Suportada nativamente no GitLab/GitHub)*
 
-graph TD  
-    User\[Usuário / Cliente HTTP\] \--\>|Upload| S3\[Amazon S3 \\n Bucket: visionmind-raw-images\]  
-    S3 \-- Trigger: s3:ObjectCreated \--\> Lambda\[AWS Lambda \\n Função Python\]  
-    IAM{{IAM Role: \\n Least Privilege}} \-.-\>|Permissões| Lambda  
-    Lambda \--\>|API Boto3| Rekognition\[Amazon Rekognition\]  
-    Rekognition \--\>|Retorna Tags| Lambda  
-    Lambda \--\>|API Boto3| DynamoDB\[(Amazon DynamoDB \\n Tabela: ImageMetadata)\]
+```mermaid
+graph TD
+  User[Usuário / Cliente HTTP] -->|Upload| S3[Amazon S3<br/>Bucket: visionmind-raw-images]
+  S3 -->|Trigger: s3:ObjectCreated| Lambda[AWS Lambda<br/>Função Python]
+  IAM{{IAM Role:<br/>Least Privilege}} -.->|Permissões| Lambda
+  Lambda -->|API Boto3| Rekognition[Amazon Rekognition]
+  Rekognition -->|Retorna Tags| Lambda
+  Lambda -->|API Boto3| DynamoDB[(Amazon DynamoDB<br/>Tabela: ImageMetadata)]
+```
 
 ## **5\. Requisitos Não Funcionais (NFRs)**
 
@@ -77,6 +89,7 @@ graph TD
 
 * **Validação de Input (OWASP):** O código Python (Lambda) aplica uma política estrita de *Allowlist* nas extensões de arquivo (.jpg, .jpeg, .png), bloqueando tentativas de injeção de arquivos maliciosos.  
 * **IAM Least Privilege:** O perfil de execução do Lambda (configurado no Terraform) possui políticas (Policies) granulares restritas ao ARN (Amazon Resource Name) específico do bucket S3 e da tabela do DynamoDB. Não são permitidas permissões globais (\* em recursos, exceto Rekognition onde é mandatório pela AWS).  
+* **Exposição Pública:** Os recursos de Storage (S3) e Database (DynamoDB) não possuem exposição pública (Block Public Access), sendo acessíveis exclusivamente pelo ambiente interno da AWS via roles dedicadas.  
 * **Gestão de Segredos:** Ausência de chaves de API ou credenciais de banco de dados *hardcoded* no código-fonte. O acesso é governado via *AssumeRole* nativo do IAM.
 
 ### **5.2. Escalabilidade e Performance**
